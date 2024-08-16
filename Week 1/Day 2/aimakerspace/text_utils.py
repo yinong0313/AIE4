@@ -7,6 +7,7 @@ class TextFileLoader:
         self.documents = []
         self.path = path
         self.encoding = encoding
+        self.metadata = [] #added by YL
 
     def load(self):
         if os.path.isdir(self.path):
@@ -21,6 +22,7 @@ class TextFileLoader:
     def load_file(self):
         with open(self.path, "r", encoding=self.encoding) as f:
             self.documents.append(f.read())
+            self.metadata.append({"filename": os.path.basename(self.path), "filepath": self.path}) #added by YL
 
     def load_directory(self):
         for root, _, files in os.walk(self.path):
@@ -31,9 +33,10 @@ class TextFileLoader:
                     ) as f:
                         self.documents.append(f.read())
 
-    def load_documents(self):
+    def load_documents_with_metadata(self): #changed name
         self.load()
-        return self.documents
+        #return self.documents
+        return [{"text": doc, "metadata": meta} for doc, meta in zip(self.documents, self.metadata)] #changed by YL
 
 
 class CharacterTextSplitter:
@@ -55,10 +58,26 @@ class CharacterTextSplitter:
             chunks.append(text[i : i + self.chunk_size])
         return chunks
 
-    def split_texts(self, texts: List[str]) -> List[str]:
+    #def split_texts(self, texts: List[str]) -> List[str]:
+    #    chunks = []
+    #    for text in texts:
+    #        chunks.extend(self.split(text))
+    #    return chunks
+
+    def split(self, text: str, metadata: dict[str, str]) -> List[dict[str, str]]:
         chunks = []
-        for text in texts:
-            chunks.extend(self.split(text))
+        for i in range(0, len(text), self.chunk_size - self.chunk_overlap):
+            chunk = text[i : i + self.chunk_size]
+            chunk_metadata = metadata.copy()
+            chunk_metadata["chunk_index"] = i // (self.chunk_size - self.chunk_overlap)
+            chunks.append({"text": chunk, "metadata": chunk_metadata})
+        return chunks
+    def split_texts_with_metadata(
+        self, documents_with_metadata: List[dict[str, str]]
+    ) -> List[dict[str, str]]:
+        chunks = []
+        for document in documents_with_metadata:
+            chunks.extend(self.split(document["text"], document["metadata"]))
         return chunks
 
 
@@ -66,7 +85,8 @@ if __name__ == "__main__":
     loader = TextFileLoader("data/KingLear.txt")
     loader.load()
     splitter = CharacterTextSplitter()
-    chunks = splitter.split_texts(loader.documents)
+    #chunks = splitter.split_texts(loader.documents)
+    chunks = splitter.split_texts_with_metadata(loader.documents)
     print(len(chunks))
     print(chunks[0])
     print("--------")
