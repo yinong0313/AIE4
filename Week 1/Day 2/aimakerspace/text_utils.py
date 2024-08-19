@@ -52,11 +52,11 @@ class CharacterTextSplitter:
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
 
-    def split(self, text: str) -> List[str]:
-        chunks = []
-        for i in range(0, len(text), self.chunk_size - self.chunk_overlap):
-            chunks.append(text[i : i + self.chunk_size])
-        return chunks
+    # def split(self, text: str) -> List[str]:
+    #     chunks = []
+    #     for i in range(0, len(text), self.chunk_size - self.chunk_overlap):
+    #         chunks.append(text[i : i + self.chunk_size])
+    #     return chunks
 
     #def split_texts(self, texts: List[str]) -> List[str]:
     #    chunks = []
