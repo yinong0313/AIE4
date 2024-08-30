@@ -1,0 +1,19 @@
+🚀 The 'Extending Llama-3’s Context Ten-Fold Overnight' study is breaking barriers, people!
+
+1️⃣ These brainiacs cranked up the context length of the Llama-3-8B-Instruct model from 8K to a massive 80K tokens using some nifty QLoRA fine-tuning. And get this, they did it in a mere 8 hours on an 8xA800 (80G) GPU machine. Talk about speed!
+
+2️⃣ The beefed-up model is acing various evaluation tasks like NIHS, topic retrieval, and long-context language understanding, all while keeping its original short context skills sharp. 
+
+3️⃣ They pulled this off by generating 3.5K synthetic training samples with GPT-4. This just goes to show the untapped might of large language models.
+
+4️⃣ The training dataset was a blend of 20K instances, tossing in 5K instances from RedPajama and 12K instruction tuning instances from LongAlpaca to keep forgetting at bay.
+
+5️⃣ QLoRA was the secret sauce for fine-tuning the model, applying it to different projections and the embedding layer, all with parameters set for efficient training.
+
+6️⃣ These folks are all about open research, planning to roll out all resources related to their work to the public. 
+
+7️⃣ The study also stacked up the zero-shot performance of their model against other baselines. While the long-context models may lag behind the original Llama-3-8B-Instruct in short-context tasks, they still leave other open-source models of the same scale in the dust.
+
+This study is a game-changer, pushing the boundaries in extending context lengths for large language models and revolutionizing their performance and usability. 
+
+So, what's your take on the power of these large language models with extended context lengths? Let's get the convo started in the comments below. 🚀🔥
