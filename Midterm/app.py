@@ -78,7 +78,7 @@ async def on_chat_start():
         content=f"Processing PDF files ...", disable_human_feedback=True
     )
     await msg.send()
-    
+
     documents = []
     for pdf_link in pdf_links:
         loader = PyMuPDFLoader(pdf_link)
@@ -96,7 +96,7 @@ async def on_chat_start():
         length_function = len,
     )
     split_chunks = text_splitter.split_documents(documents)
-
+    #more
     # Create a Qdrant vector store
     # docsearch = await cl.make_async(Chroma.from_texts)(
     #     texts, embeddings, metadatas=metadatas
