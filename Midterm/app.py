@@ -44,65 +44,75 @@ prompt = ChatPromptTemplate.from_messages(messages)
 chain_type_kwargs = {"prompt": prompt}
 
 
-def generate_vdb(chunks):
+def generate_vdb(chunks=None):
     EMBEDDING_MODEL = "text-embedding-3-small"
     embeddings = OpenAIEmbeddings(model=EMBEDDING_MODEL)
-    LOCATION = ":memory:"
-    COLLECTION_NAME = "legal data"
+    PERSIST_PATH = "./qdrant_vector_db"  # Directory to store Qdrant collection
+    COLLECTION_NAME = "legal_data"
     VECTOR_SIZE = 1536
 
-    qdrant_client = QdrantClient(LOCATION)
-
-    qdrant_client.create_collection(
-        collection_name=COLLECTION_NAME,
-        vectors_config=VectorParams(size=VECTOR_SIZE, distance=Distance.COSINE),
-    )
-
-    qdrant_vector_store = QdrantVectorStore(
-        client=qdrant_client,
-        collection_name=COLLECTION_NAME,
-        embedding=embeddings,
-    )
-
-    qdrant_vector_store.add_documents(chunks)
+    # Check if the vector database already exists
+    if os.path.exists(PERSIST_PATH):
+        print(f"Loading existing Qdrant database from {PERSIST_PATH}")
+        qdrant_client = QdrantClient(path=PERSIST_PATH)  # Load the existing DB
+        qdrant_vector_store = QdrantVectorStore(
+            client=qdrant_client,
+            collection_name=COLLECTION_NAME,
+            embedding=embeddings,
+        )
+    else:
+        print(f"Creating new Qdrant database at {PERSIST_PATH}")
+        qdrant_client = QdrantClient(path=PERSIST_PATH)  # Create a new DB
+        qdrant_client.create_collection(
+            collection_name=COLLECTION_NAME,
+            vectors_config=VectorParams(size=VECTOR_SIZE, distance=Distance.COSINE),
+        )
+        qdrant_vector_store = QdrantVectorStore(
+            client=qdrant_client,
+            collection_name=COLLECTION_NAME,
+            embedding=embeddings,
+        )
+        qdrant_vector_store.add_documents(chunks)
     return qdrant_vector_store
 
 
 @cl.on_chat_start
 async def on_chat_start():
+    await cl.Avatar(
+        name="Chat Legal AI",
+        path="./chat_logo.jpg",
+    ).send()
+
     pdf_links = [
     "https://www.whitehouse.gov/wp-content/uploads/2022/10/Blueprint-for-an-AI-Bill-of-Rights.pdf",
     "https://nvlpubs.nist.gov/nistpubs/ai/NIST.AI.600-1.pdf"]
 
+    if not os.path.exists("./qdrant_vector_db"):
+        documents = []
+        for pdf_link in pdf_links:
+            loader = PyMuPDFLoader(pdf_link)
+            loaded_docs = loader.load()
+            documents.extend(loaded_docs)
+
+        CHUNK_SIZE = 1000
+        CHUNK_OVERLAP = 200
+
+        text_splitter = RecursiveCharacterTextSplitter(
+            chunk_size=CHUNK_SIZE,
+            chunk_overlap=CHUNK_OVERLAP,
+            length_function=len,
+        )
+        split_chunks = text_splitter.split_documents(documents)
+
+        docsearch = generate_vdb(split_chunks)
+    else:
+        docsearch = generate_vdb()
+
+    # Let the user know that the system is ready
     msg = cl.Message(
-        content=f"Processing PDF files ...", disable_human_feedback=True
-    )
+        content=f"Welcome to the AI Legal Chatbot! Ask me anything about the AI policy", disable_human_feedback=True, author="Chat Legal AI"
+        )
     await msg.send()
-
-    documents = []
-    for pdf_link in pdf_links:
-        loader = PyMuPDFLoader(pdf_link)
-        loaded_docs = loader.load()
-        
-        for doc in loaded_docs:
-            doc.metadata['uuid'] = str(uuid.uuid4())  # Add UUID to metadata
-        documents.extend(loaded_docs)
-    CHUNK_SIZE = 1000
-    CHUNK_OVERLAP = 200
-
-    text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size = CHUNK_SIZE,
-        chunk_overlap = CHUNK_OVERLAP,
-        length_function = len,
-    )
-    split_chunks = text_splitter.split_documents(documents)
-    #more
-    # Create a Qdrant vector store
-    # docsearch = await cl.make_async(Chroma.from_texts)(
-    #     texts, embeddings, metadatas=metadatas
-    # )
-
-    docsearch = generate_vdb(split_chunks)
 
     message_history = ChatMessageHistory()
 
@@ -121,11 +131,6 @@ async def on_chat_start():
         memory=memory,
         return_source_documents=True,
     )
-
-    # Let the user know that the system is ready
-    msg.content = f"Loading PDF done. You can now ask questions!"
-    await msg.update()
-
     cl.user_session.set("chain", chain)
 
 
@@ -154,4 +159,4 @@ async def main(message):
         else:
             answer += "\nNo sources found"
 
-    await cl.Message(content=answer, elements=text_elements).send()
+    await cl.Message(content=answer, elements=text_elements,author="Chat Legal AI").send()
