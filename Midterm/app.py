@@ -1,7 +1,9 @@
 import os
 from typing import List
+from langchain_community.document_loaders import PyMuPDFLoader
+import uuid
 
-from langchain.embeddings.openai import OpenAIEmbeddings
+from langchain_openai import OpenAIEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores import Chroma
 from langchain.chains import (
@@ -19,8 +21,9 @@ from langchain.memory import ChatMessageHistory, ConversationBufferMemory
 from chainlit.types import AskFileResponse
 
 import chainlit as cl
-
-text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
+from langchain_qdrant import QdrantVectorStore
+from qdrant_client import QdrantClient
+from qdrant_client.http.models import Distance, VectorParams
 
 system_template = """Use the following pieces of context to answer the users question.
 If you don't know the answer, just say that you don't know, don't try to make up an answer.
@@ -41,52 +44,65 @@ prompt = ChatPromptTemplate.from_messages(messages)
 chain_type_kwargs = {"prompt": prompt}
 
 
-def process_file(file: AskFileResponse):
-    import tempfile
+def generate_vdb(chunks):
+    EMBEDDING_MODEL = "text-embedding-3-small"
+    embeddings = OpenAIEmbeddings(model=EMBEDDING_MODEL)
+    LOCATION = ":memory:"
+    COLLECTION_NAME = "legal data"
+    VECTOR_SIZE = 1536
 
-    with tempfile.NamedTemporaryFile(mode="w", delete=False) as tempfile:
-        with open(tempfile.name, "wb") as f:
-            f.write(file.content)
+    qdrant_client = QdrantClient(LOCATION)
 
-    pypdf_loader = PyPDFLoader(tempfile.name)
-    texts = pypdf_loader.load_and_split()
-    texts = [text.page_content for text in texts]
-    return texts
+    qdrant_client.create_collection(
+        collection_name=COLLECTION_NAME,
+        vectors_config=VectorParams(size=VECTOR_SIZE, distance=Distance.COSINE),
+    )
+
+    qdrant_vector_store = QdrantVectorStore(
+        client=qdrant_client,
+        collection_name=COLLECTION_NAME,
+        embedding=embeddings,
+    )
+
+    qdrant_vector_store.add_documents(chunks)
+    return qdrant_vector_store
 
 
 @cl.on_chat_start
 async def on_chat_start():
-    files = None
-
-    # Wait for the user to upload a file
-    while files == None:
-        files = await cl.AskFileMessage(
-            content="Please upload a PDF file to begin!",
-            accept=["application/pdf"],
-            max_size_mb=20,
-            timeout=180,
-        ).send()
-
-    file = files[0]
+    pdf_links = [
+    "https://www.whitehouse.gov/wp-content/uploads/2022/10/Blueprint-for-an-AI-Bill-of-Rights.pdf",
+    "https://nvlpubs.nist.gov/nistpubs/ai/NIST.AI.600-1.pdf"]
 
     msg = cl.Message(
-        content=f"Processing `{file.name}`...", disable_human_feedback=True
+        content=f"Processing PDF files ...", disable_human_feedback=True
     )
     await msg.send()
+    
+    documents = []
+    for pdf_link in pdf_links:
+        loader = PyMuPDFLoader(pdf_link)
+        loaded_docs = loader.load()
+        
+        for doc in loaded_docs:
+            doc.metadata['uuid'] = str(uuid.uuid4())  # Add UUID to metadata
+        documents.extend(loaded_docs)
+    CHUNK_SIZE = 1000
+    CHUNK_OVERLAP = 200
 
-    # load the file
-    texts = process_file(file)
-
-    print(texts[0])
-
-    # Create a metadata for each chunk
-    metadatas = [{"source": f"{i}-pl"} for i in range(len(texts))]
-
-    # Create a Chroma vector store
-    embeddings = OpenAIEmbeddings()
-    docsearch = await cl.make_async(Chroma.from_texts)(
-        texts, embeddings, metadatas=metadatas
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size = CHUNK_SIZE,
+        chunk_overlap = CHUNK_OVERLAP,
+        length_function = len,
     )
+    split_chunks = text_splitter.split_documents(documents)
+
+    # Create a Qdrant vector store
+    # docsearch = await cl.make_async(Chroma.from_texts)(
+    #     texts, embeddings, metadatas=metadatas
+    # )
+
+    docsearch = generate_vdb(split_chunks)
 
     message_history = ChatMessageHistory()
 
@@ -107,7 +123,7 @@ async def on_chat_start():
     )
 
     # Let the user know that the system is ready
-    msg.content = f"Processing `{file.name}` done. You can now ask questions!"
+    msg.content = f"Loading PDF done. You can now ask questions!"
     await msg.update()
 
     cl.user_session.set("chain", chain)

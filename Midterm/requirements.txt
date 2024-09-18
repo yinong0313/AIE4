@@ -6,7 +6,7 @@ langchainhub
 langchain-qdrant
 tiktoken
 pypdf
-chainlit
+chainlit==0.7.700
 openai
 qdrant-client
 pymupdf
