@@ -42,5 +42,13 @@ Deliverables:
 Generate synthetic fine-tuning data and complete fine-tuning of the open-source embedding model
 Deliverables:
 1. Swap out your existing embedding model for the new fine-tuned version.  Provide a link to your fine-tuned embedding model on the Hugging Face Hub.
+    - yinong333/finetuned_MiniLM
+    - https://huggingface.co/yinong333/finetuned_MiniLM
 2. How did you choose the embedding model for this application?
     - I chose sentence-transformers/all-MiniLM-L6-v2 as my base model. This is one of the most popular lightweight models for generating sentence embeddings. It is based on BERT but optimized to be smaller and faster while still offering strong performance. It is good for RAG tasks where we need fast embeddings for real-time search and retrieval.
+
+# Task 5: Assessing Performance
+Assess the performance of 1) the fine-tuned model, and 2) the two proposed chunking strategies
+1. Test the fine-tuned embedding model using the RAGAS frameworks to quantify any improvements.  Provide results in a table.
+    - base_rag_chain (base model):  {'faithfulness': 0.8569, 'answer_relevancy': 0.9679, 'context_recall': 0.8833, 'context_precision': 0.8820, 'answer_correctness': 0.7101}
+    - ![alt text](image.png)
