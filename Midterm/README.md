@@ -51,4 +51,18 @@ Deliverables:
 Assess the performance of 1) the fine-tuned model, and 2) the two proposed chunking strategies
 1. Test the fine-tuned embedding model using the RAGAS frameworks to quantify any improvements.  Provide results in a table.
     - base_rag_chain (base model):  {'faithfulness': 0.8569, 'answer_relevancy': 0.9679, 'context_recall': 0.8833, 'context_precision': 0.8820, 'answer_correctness': 0.7101}
-    - ![alt text](image.png)
+        - ![alt text](image.png)
+    - fine_tune_rag_chain:  {'faithfulness': 0.8417, 'answer_relevancy': 0.9644, 'context_recall': 0.9083, 'context_precision': 0.8878, 'answer_correctness': 0.7437}
+        - ![alt text](image-1.png)
+2. Test the two chunking strategies using the RAGAS frameworks to quantify any improvements. Provide results in a table. 
+    - chunk_500_results:  {'faithfulness': 0.7355, 'answer_relevancy': 0.8306, 'context_recall': 0.8250, 'context_precision': 0.8389, 'answer_correctness': 0.6767}
+        - ![alt text](image-4.png)
+    - chunk_1000_results:  {'faithfulness': 0.8457, 'answer_relevancy': 0.9276, 'context_recall': 0.9000, 'context_precision': 0.8861, 'answer_correctness': 0.7830}
+        - ![alt text](image-2.png)
+    - chunk_section_results:  {'faithfulness': 0.8802, 'answer_relevancy': 0.9652, 'context_recall': 0.9667, 'context_precision': 0.9375, 'answer_correctness': 0.7438}
+        - ![alt text](image-3.png)
+3. The AI Solutions Engineer asks you “Which one is the best to test with internal stakeholders next week, and why?”
+
+# Task 6: Managing Your Boss and User Expectations
+1. What is the story that you will give to the CEO to tell the whole company at the launch next month?
+2. There appears to be important information not included in our build, for instance, the 270-day update on the 2023 executive order on Safe, Secure, and Trustworthy AI.  How might you incorporate relevant white-house briefing information into future versions? 
