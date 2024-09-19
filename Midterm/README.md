@@ -34,7 +34,7 @@ Generate a synthetic test data set and baseline an initial evaluation
 Deliverables:
 1. Assess your pipeline using the RAGAS framework including key metrics faithfulness, answer relevancy, context precision, and context recall.  Provide a table of your output results.
     - I generated 20 synthetic questions, the overal scores are: {'faithfulness': 0.8481, 'answer_relevancy': 0.9196, 'context_recall': 0.8833, 'context_precision': 0.8819, 'answer_correctness': 0.6919}
-    detailed tables is showing in the notebook
+    - ![alt text](image-5.png)
 2. What conclusions can you draw about performance and effectiveness of your pipeline with this information?
     - I think overall, both based on the generation part and the retrieval part, the performance is pretty ok
 
