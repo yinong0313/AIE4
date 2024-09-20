@@ -54,6 +54,8 @@ Assess the performance of 1) the fine-tuned model, and 2) the two proposed chunk
         - ![alt text](image.png)
     - fine_tune_rag_chain:  {'faithfulness': 0.8417, 'answer_relevancy': 0.9644, 'context_recall': 0.9083, 'context_precision': 0.8878, 'answer_correctness': 0.7437}
         - ![alt text](image-1.png)
+    - (also tested text-embedding-3-small) t3_rag_chain:  {'faithfulness': 0.8784, 'answer_relevancy': 0.9193, 'context_recall': 0.9083, 'context_precision': 0.8557, 'answer_correctness': 0.7048}
+
 2. Test the two chunking strategies using the RAGAS frameworks to quantify any improvements. Provide results in a table. 
     - chunk_500_results:  {'faithfulness': 0.7355, 'answer_relevancy': 0.8306, 'context_recall': 0.8250, 'context_precision': 0.8389, 'answer_correctness': 0.6767}
         - ![alt text](image-4.png)
@@ -62,7 +64,25 @@ Assess the performance of 1) the fine-tuned model, and 2) the two proposed chunk
     - chunk_section_results:  {'faithfulness': 0.8802, 'answer_relevancy': 0.9652, 'context_recall': 0.9667, 'context_precision': 0.9375, 'answer_correctness': 0.7438}
         - ![alt text](image-3.png)
 3. The AI Solutions Engineer asks you “Which one is the best to test with internal stakeholders next week, and why?”
+    -  I can see there is an improvement from using the base model to fine-tuned model in most of the metircs. Although there is a slightly faithfulness decrease, but it's more to tie the generation part which is tie to rag_llm we used. On the retrieval part the increase is obvious, meaning our embeddings are getting better so the right context can be retrieved. But I also tested the fine-tuned model VS the OpenAI's text-embedding-3-small, and the "is_hit" is 0.95 for text-embedding-3-small and about 0.93 for the fine-tuned model. along with higher faithfulness and context_recall. 
+    
+    - Chunking size wise, 1000 is better than 500, but surprisingly, the chunk_by_section method has a very good score, but as I tested earlier, the "is_hit" rate is quite low. Ane the risk there is the chunk size is pretty big, and if it missed to retrieved the correct chunk, our loss will be big. 
+
+    - So in summary I think we can either use text-embedding-3-small or our fine-tuned model. Our fine-tuned model is faster, small, and cost-efficient, while text-embedding-3-small is able to provide more accurate answer. 
 
 # Task 6: Managing Your Boss and User Expectations
 1. What is the story that you will give to the CEO to tell the whole company at the launch next month?
+    (assume the 2 PDF serves the foundation of process/handling more complex legal documents)
+    - Next month, we are proud to launch a groundbreaking AI-powered platform that will revolutionize how legal professionals and clients interact with complex legal documents. Our Retrieval-Augmented Generation (RAG) system, built with cutting-edge technology, allows users to chat directly with legal texts in a way that is intuitive, fast, and reliable.Here's what sets our solution apart:
+    
+    Empowering Legal Professionals with Instant Access: Imagine being able to ask any question about a legal contract, policy, or document and receive accurate, context-driven responses in real time. With our solution, legal teams and clients no longer need to search through pages of complex documents; the answers come to them instantly. This reduces time spent on document reviews and improves accuracy in legal analysis.
+    
+    Advanced AI and Fine-Tuned Precision: we've leveraged advanced chunking strategies and fine-tuned embedding models to create a system that can retrieve the most relevant information from vast collections of legal texts. The AI understands the nuances of legal language and provides contextually accurate answers, making it a trusted companion for legal professionals.
+    
+    Evaluation and Quality Assurance: Our solution was rigorously evaluated using Ragas (a framework that helps to evaluate RAG pipelines, ensuring that the responses are of the highest quality, with both precision and recall finely tuned for legal documents. This guarantees that users can trust the AI's responses as reliable and legally sound.
+    
+    User-Friendly Experience: We didn’t stop at technical excellence. The platform is deployed on Hugging Face Spaces, allowing us to deliver a seamless, secure, and scalable experience for our users. The interface is designed to be intuitive, so both legal experts and clients can interact effortlessly with the platform.
+
 2. There appears to be important information not included in our build, for instance, the 270-day update on the 2023 executive order on Safe, Secure, and Trustworthy AI.  How might you incorporate relevant white-house briefing information into future versions? 
+    - we can periodically download (spyder, or API request?) relevant AI-related documents from trusted sources, such as the White House’s official website. For example, set up automated data pipelines to pull new policy briefs or executive order updates into the document base as they are published.
+    - we can also create a system to categorize newly added documents based on key topics such as AI policies, regulatory updates, security frameworks, etc. This would allow the model to better target relevant answers. Also in the metadata information, we should include something like "publish date" for each document we downloaded. 
