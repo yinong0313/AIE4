@@ -7,11 +7,11 @@ Deliverables:
 2. Articulate a chunking strategy that you would also like to test out.
     - Chunk by section/paragraph
 3. Describe how and why you made these decisions
-    - I picked 10 random piece of chunks and generated 2 questions per chunk - This will the "ground truth"
+    - I picked 10 random piece of chunks and generated 2 questions per chunk - This will be the "ground truth"
     - Then I created 2 retrievers based on different chunk size (500 VS 1000), along with a retriever that is based on text split by section/paragraph
     - Ran through generated questions and calculate the "is_hit" rate (i.e., if retriever retrieved correct chunk, then 1 else 0)
     - Ideally ran it multiple times (since our questions are randomly generated) and check the mean "is_hit" rate
-    - I ran it couple time, in general chunk_size = 1000 and overlap = 200 always gives the but resutls
+    - I ran it couple time, in general chunk_size = 1000 and overlap = 200 always gives the but resutls (you can check the details in "Task 1-3 Notebook.ipynb")
 
 # Task 2: Building a Quick End-to-End Prototype
 Build an end-to-end RAG application using an industry-standard open-source stack and your choice of commercial off-the-shelf models
@@ -33,7 +33,7 @@ Deliverables:
 Generate a synthetic test data set and baseline an initial evaluation
 Deliverables:
 1. Assess your pipeline using the RAGAS framework including key metrics faithfulness, answer relevancy, context precision, and context recall.  Provide a table of your output results.
-    - I generated 20 synthetic questions, the overal scores are: {'faithfulness': 0.8481, 'answer_relevancy': 0.9196, 'context_recall': 0.8833, 'context_precision': 0.8819, 'answer_correctness': 0.6919}
+    - I generated 20 synthetic questions, the overal scores are: {'faithfulness': 0.8481, 'answer_relevancy': 0.9196, 'context_recall': 0.8833, 'context_precision': 0.8819, 'answer_correctness': 0.6919}. The code to generate the testset is in "Task 1-3 Notebook.ipynb", and the testset in saved as "testset.csv"
     - ![alt text](image-5.png)
 2. What conclusions can you draw about performance and effectiveness of your pipeline with this information?
     - I think overall, both based on the generation part and the retrieval part, the performance is pretty ok
@@ -44,6 +44,7 @@ Deliverables:
 1. Swap out your existing embedding model for the new fine-tuned version.  Provide a link to your fine-tuned embedding model on the Hugging Face Hub.
     - yinong333/finetuned_MiniLM
     - https://huggingface.co/yinong333/finetuned_MiniLM
+    - (although in my fine app, I didn't use the finetuned model, I feel the OPENAI t3 model is pretty good based on later evaluating and the response is way faster. You can see the code for swapping the model in my app.py although I commonded them out later.)
 2. How did you choose the embedding model for this application?
     - I chose sentence-transformers/all-MiniLM-L6-v2 as my base model. This is one of the most popular lightweight models for generating sentence embeddings. It is based on BERT but optimized to be smaller and faster while still offering strong performance. It is good for RAG tasks where we need fast embeddings for real-time search and retrieval.
 
@@ -64,11 +65,11 @@ Assess the performance of 1) the fine-tuned model, and 2) the two proposed chunk
     - chunk_section_results:  {'faithfulness': 0.8802, 'answer_relevancy': 0.9652, 'context_recall': 0.9667, 'context_precision': 0.9375, 'answer_correctness': 0.7438}
         - ![alt text](image-3.png)
 3. The AI Solutions Engineer asks you “Which one is the best to test with internal stakeholders next week, and why?”
-    -  I can see there is an improvement from using the base model to fine-tuned model in most of the metircs. Although there is a slightly faithfulness decrease, but it's more to tie the generation part which is tie to rag_llm we used. On the retrieval part the increase is obvious, meaning our embeddings are getting better so the right context can be retrieved. But I also tested the fine-tuned model VS the OpenAI's text-embedding-3-small, and the "is_hit" is 0.95 for text-embedding-3-small and about 0.93 for the fine-tuned model. along with higher faithfulness and context_recall. 
+    -  I can see there is an improvement from using the base model to fine-tuned model in most of the metircs. Although there is a slightly faithfulness decrease, but it's more to tie the generation part which is tie to rag_llm we used. On the retrieval part the increase is obvious, meaning our embeddings are getting better so the right context can be retrieved. But I also tested the fine-tuned model VS the OpenAI's text-embedding-3-small, and the "is_hit" is 0.95 for text-embedding-3-small and about 0.93 for the fine-tuned model. along with higher faithfulness and context_recall. (the testing scores can be found in "Task 4-5 Notebook.ipynb")
     
-    - Chunking size wise, 1000 is better than 500, but surprisingly, the chunk_by_section method has a very good score, but as I tested earlier, the "is_hit" rate is quite low. Ane the risk there is the chunk size is pretty big, and if it missed to retrieved the correct chunk, our loss will be big. 
+    - Chunking size wise, 1000 is better than 500, but surprisingly, the chunk_by_section method has a very good score, but as I tested earlier, the "is_hit" rate is quite low. Ane the risk there is the chunk size is pretty big, and if it missed to retrieve the correct chunk, our loss will be big. 
 
-    - So in summary I think we can either use text-embedding-3-small or our fine-tuned model. Our fine-tuned model is faster, small, and cost-efficient, while text-embedding-3-small is able to provide more accurate answer. 
+    - So in summary I think we can either use text-embedding-3-small or our fine-tuned model. Our fine-tuned model is small and cost-efficient, while text-embedding-3-small is able to provide more accurate answer. 
 
 # Task 6: Managing Your Boss and User Expectations
 1. What is the story that you will give to the CEO to tell the whole company at the launch next month?
