@@ -18,6 +18,7 @@ Build an end-to-end RAG application using an industry-standard open-source stack
 Deliverables:
 1. Build a live public prototype on Hugging Face, and include the public URL link to your space.
     - https://huggingface.co/spaces/yinong333/ChatwithLegalPDF
+    - loom video: https://www.loom.com/share/aaa3ae0f167f46f6a1f6699f0e32549d?sid=57dad90a-d6df-4fd6-9fae-f1f32873554e
 
 2. How did you choose your stack, and why did you select each tool the way you did?
     - Qdrant
