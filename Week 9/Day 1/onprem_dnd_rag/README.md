@@ -5,4 +5,3 @@ This LangServe application will need:
 - [vLLM Endpoint](https://docs.vllm.ai/en/v0.5.5/serving/deploying_with_docker.html)
 - [Ollama Model Served](https://ollama.com/blog/embedding-models)
 - [Qdrant](https://qdrant.tech/documentation/quickstart/)
-- refer to repo: https://github.com/AI-Maker-Space/LangServe-Demo/tree/main
